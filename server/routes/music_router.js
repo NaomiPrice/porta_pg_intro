@@ -6,6 +6,7 @@ router.get('/', (req, res) => {
     let querryText = `SELECT * FROM "songs";`;
     pool.query(querryText)
     .then((result)=>{
+        // console.log(result.rows);
         res.send(result.rows);
     }).catch((err)=>{
         console.log('error making query: ', err);
@@ -27,12 +28,31 @@ router.post('/', (req, res) => {
     })
 })
 
+router.put('/rank/:id', (req, res)=>{
+    console.log(req.params.id, req.body.direction);
+    let songId = req.params.id;
+    let direction = req.body.direction;
+    let querryText = '';
+    if(direction == '+'){
+        querryText = `UPDATE "songs" SET "rank" = "rank" + 1 WHERE "id" = $1`;
+    } else if (direction == '-'){
+        querryText = `UPDATE "songs" SET "rank" = "rank" -1 WHERE "id" = $1`;
+    } else {
+        res.sendStatus(500);
+    }
+    pool.query(querryText, [songId]).then((result)=>{
+        res.sendStatus(200);
+    }).catch((error)=>{
+        console.log('error makig put request', error);
+        res.sendStatus(500);
+    })
+    
+})
 
 router.delete('/:id', (req, res)=>{
     console.log('hello from the deleteing', req.params.id);
     let querryText = `DELETE FROM "songs" WHERE "id" = $1;`;
     pool.query(querryText, [req.params.id]).then((result)=>{
-        console.log(result);
         res.sendStatus(200);
     }).catch((err)=>{
         console.log('error', err);
